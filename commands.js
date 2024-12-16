@@ -4,13 +4,13 @@ import { capitalize, InstallGlobalCommands } from './utils.js';
 
 // Get the game choices from game.js
 function createCommandChoices() {
-  const choices = getRPSChoices();
+  const choices = getMaps();
   const commandChoices = [];
 
   for (let choice of choices) {
     commandChoices.push({
-      name: capitalize(choice),
-      value: choice.toLowerCase(),
+      name: choice,
+      value: choice,
     });
   }
 
@@ -27,14 +27,14 @@ const TEST_COMMAND = {
 };
 
 // Command containing options
-const CHALLENGE_COMMAND = {
-  name: 'challenge',
-  description: 'Challenge to a match of rock paper scissors',
+const nominate = {
+  name: 'nominate',
+  description: 'nominate a map',
   options: [
     {
       type: 3,
       name: 'object',
-      description: 'Pick your object',
+      description: 'Time to choose...',
       required: true,
       choices: createCommandChoices(),
     },
@@ -44,6 +44,6 @@ const CHALLENGE_COMMAND = {
   contexts: [0, 2],
 };
 
-const ALL_COMMANDS = [TEST_COMMAND, CHALLENGE_COMMAND];
+const ALL_COMMANDS = [TEST_COMMAND, nominate];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);
