@@ -168,19 +168,31 @@ export function rockTheVote() {
   console.log('nominated:', nominated);
 }
 
-export function nominate(map) {
-  if (maps.includes(map) && nominated.length < max_nominations) {
-    nominated.push(map);
+export function nominate(map, player) {
+  if (nominated.length < max_nominations)
+  {
+    if (maps.includes(map)) {
+      nominated.push({map: map, nominator: player});
+    }
+    else {
+      const aliased = maps.filter((m) => {
+        return m.aliases.includes(map);
+      });
+
+      if (aliased.length === 1)
+        nominated.push({map: aliased.pop(), nominator: player});
+      else
+        throw "Cant find a map by that name, sorry";
+    }
   }
 }
 
 // Function to fetch shuffled options for select menu
 export function getShuffledOptions(choices) {
 
-  const allChoices = choices.shuffle();
   const options = [];
 
-  for (let choice of allChoices) {
+  for (let choice of choices) {
     // Formatted for select menus
     // https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-option-structure
     options.push({
