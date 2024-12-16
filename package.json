@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "jest",
-    "prepare": "husky"
+    "prepare": "husky",
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
