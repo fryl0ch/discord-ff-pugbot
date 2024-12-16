@@ -1,0 +1,49 @@
+services:
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - 8089:80
+    volumes:
+      - ./public:/usr/share/nginx/html
+    networks:
+      - ff-pugbot
+
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - mariadb_logs:/var/log/mysql
+    networks:
+      - ff-pugbot
+
+  node:
+    image: node:current-alpine
+    restart: no
+    env_file: .env
+    ports:
+      - "3000:3000"
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=dev
+    volumes:
+      - ./:/home/node/app
+      - node_modules:/home/node/app/node_modules
+    networks:
+      - ff-pugbot
+    command: npm run start
+
+networks:
+  ff-pugbot:
+    driver: bridge
+
+secrets:
+   db_root_password:
+     file: ./secrets/db_root_password.txt
+
+volumes:
+  mariadb_data:
+  mariadb_logs:
+  node_modules:
