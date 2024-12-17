@@ -4,12 +4,8 @@ import { InstallGlobalCommands } from './utils.js';
 
 // Get the game choices from game.js
 function createNominateChoices() {
-  const choices = getMaps().filter((map_name) => {
-    if (map_name.includes['nyx'] || map_name.includes['openfire'] || map_name.includes['2fort'])
-      return true;
-    else
-      return false;
-  });
+  const maps = getMaps();
+  const choices = ['ff_openfire', 'ff_nyx_b2', 'ff_2fort'];
 
   console.log('choices:', choices);
 

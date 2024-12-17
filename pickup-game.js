@@ -232,7 +232,7 @@ const maps = {
 };
 
 export function getMaps() {
-  return Object.keys(maps);
+  return maps;
 }
 
 export function rockTheVote() {
