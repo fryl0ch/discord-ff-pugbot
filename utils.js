@@ -36,7 +36,7 @@ export async function InstallGlobalCommands(appId, commands) {
   }
 }
 
-export function fiftyEightBall()
+export function eightBall()
 {
   const options = {
     yes: [
