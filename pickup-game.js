@@ -46,7 +46,7 @@ export function pickup() {
   }
   else if (started === true)
   {
-    throw 'a pug has already been started!';
+    return 'a pug has already been started!';
   }
 }
 
@@ -69,6 +69,13 @@ export function add(player) {
   }
   else
     return `${player} is already in the pool!`
+}
+
+export function teams() {
+  if (!started)
+    return 'there is no pickup running';
+  else
+    return pool;
 }
 
 export function remove(player) {
