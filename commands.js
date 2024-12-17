@@ -4,7 +4,13 @@ import { InstallGlobalCommands } from './utils.js';
 
 // Get the game choices from game.js
 function createCommandChoices() {
-  const choices = getMaps();
+  const choices = getMaps().filter((map_name) => {
+    if (map_name.includes['nyx'] || map_name.includes['openfire'] || map_name.includes['2fort'])
+      return true;
+    else
+      return false;
+  });
+  
   const commandChoices = [];
 
   for (let choice of choices) {
