@@ -42,6 +42,7 @@ export function pickup() {
             pool: pool,
             map: null,
           };
+    return 'a pickup has been started!'
   }
   else if (started === true)
   {
@@ -54,26 +55,40 @@ export function end() {
   {
     started = false;
     game = null;
+    return 'pickup ended';
   }
+  else
+    return 'there is no pickup running';
 }
 
 export function add(player) {
   if (!pool.includes(player))
+  {
     pool.push(player)
+    return `${player} has joined the pickup! ${pool.length}/${game.size}`;
+  }
   else
-    throw `${player} is already in the pool!`
+    return `${player} is already in the pool!`
 }
 
 export function remove(player) {
-  if (pool.includes(player))
-    pool = pool.filter((p) => {
-      if (p === player)
-        return false;
-      else
-        return true;
-    });
+  if (started === true)
+  {
+    if (pool.includes(player))
+    {
+      pool = pool.filter((p) => {
+        if (p === player)
+          return false;
+        else
+          return true;
+      });
+      return `${player} has left the building`
+    }
+    else
+      return `${player} isn't even added!`;
+  }
   else
-    throw `${player} wasn't even added`;
+    return `there's no pickup running yet! /pickup to start one.`
 }
 
 
