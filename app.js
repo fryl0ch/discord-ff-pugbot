@@ -35,7 +35,9 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
   if (type === InteractionType.APPLICATION_COMMAND) {
     const { name } = data;
 
-    // "test" command
+    console.log('APPLICATION_COMMAND recived: ', data);
+
+    // "pickup" command
     if (name === 'pickup') {
       // Send a message into the channel where command was triggered from
       return res.send({
@@ -43,6 +45,17 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
         data: {
           // Fetches a random emoji to send from a helper function
           content: pickup(),
+        },
+      });
+    }
+
+    if (name === 'nominate') {
+      // Send a message into the channel where command was triggered from
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          // Fetches a random emoji to send from a helper function
+          content: nominate(),
         },
       });
     }
