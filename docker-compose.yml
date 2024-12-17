@@ -1,18 +1,11 @@
 services:
-  nginx:
-    image: nginx:stable-alpine
-    ports:
-      - 8089:80
-    volumes:
-      - ./public:/usr/share/nginx/html
-    networks:
-      - ff-pugbot
-
   db:
     image: mariadb
-    restart: always
+    restart: no
+    secrets:
+      - db_root_password
     environment:
-      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
     volumes:
       - mariadb_data:/var/lib/mysql
       - mariadb_logs:/var/log/mysql
