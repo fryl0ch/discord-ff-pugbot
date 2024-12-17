@@ -20,11 +20,11 @@ const captain_modes = {
 };
 
 let nominated = [];
-let pool = [];
 
-let teams = {
+let pool = {
   red: [], // DEFENSE
   blue: [], // OFFENSE
+  pool: [] // player not picked yet, or pug not started yet and pug still filling
 };
 
 let started = false;
@@ -64,8 +64,8 @@ export function end() {
 export function add(player) {
   if (!pool.includes(player))
   {
-    pool.push(player)
-    return `${player} has joined the pickup! ${pool.length}/${game.size}`;
+    pool.pool.push(player)
+    return `${player} has joined the pickup! ${pool.pool.length}/${game.size}`;
   }
   else
     return `${player} is already in the pool!`
@@ -81,9 +81,9 @@ export function teams() {
 export function remove(player) {
   if (started === true)
   {
-    if (pool.includes(player))
+    if (pool.pool.includes(player))
     {
-      pool = pool.filter((p) => {
+      pool = pool.pool.filter((p) => {
         if (p === player)
           return false;
         else
