@@ -17,24 +17,24 @@ function createCommandChoices() {
   return commandChoices;
 }
 
-// Simple test command
+// start a pickup
 const TEST_COMMAND = {
-  name: 'test',
-  description: 'Basic command',
+  name: 'pickup',
+  description: 'start a pickup game (if there is not one already running)',
   type: 1,
   integration_types: [0, 1],
   contexts: [0, 1, 2],
 };
 
-// Command containing options
-const nominate = {
+// choose a map
+const NOMINATE_COMMAND = {
   name: 'nominate',
   description: 'nominate a map',
   options: [
     {
       type: 3,
       name: 'object',
-      description: 'Time to choose...',
+      description: 'nominate a map for the pool to vote on if/when the pug fills',
       required: true,
       choices: createCommandChoices(),
     },
@@ -44,6 +44,6 @@ const nominate = {
   contexts: [0, 2],
 };
 
-const ALL_COMMANDS = [TEST_COMMAND];
+const ALL_COMMANDS = [TEST_COMMAND, NOMINATE_COMMAND];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);

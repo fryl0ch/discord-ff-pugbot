@@ -27,6 +27,56 @@ let teams = {
   blue: [], // OFFENSE
 };
 
+let started = false;
+
+export let game = null;
+
+export function pickup() {
+  if (started !== true)
+  {
+    started = true;
+    game = { 
+            size: team_sizes.fours,
+            nominated: nominated,
+            mode: captain_modes.shuffle,
+            pool: pool,
+            map: null,
+          };
+  }
+  else if (started === true)
+  {
+    throw 'a pug has already been started!';
+  }
+}
+
+export function end() {
+  if (started === true)
+  {
+    started = false;
+    game = null;
+  }
+}
+
+export function add(player) {
+  if (!pool.includes(player))
+    pool.push(player)
+  else
+    throw `${player} is already in the pool!`
+}
+
+export function remove(player) {
+  if (pool.includes(player))
+    pool = pool.filter((p) => {
+      if (p === player)
+        return false;
+      else
+        return true;
+    });
+  else
+    throw `${player} wasn't even added`;
+}
+
+
 const maps = {
   ff_blockfort: { description: 'ff_blockfort' },
   ff_dustbowl: { description: 'ff_dustbowl' },
@@ -171,12 +221,12 @@ export function rockTheVote() {
 export function nominate(map, player) {
   if (nominated.length < max_nominations)
   {
-    if (maps.includes(map)) {
+    if (Object.keys(maps).includes(map)) {
       nominated.push({map: map, nominator: player});
     }
     else {
-      const aliased = maps.filter((m) => {
-        return m.aliases.includes(map);
+      const aliased = Object.keys(maps).filter((m) => {
+        return maps[m].aliases.includes(map);
       });
 
       if (aliased.length === 1)
