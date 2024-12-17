@@ -6,7 +6,7 @@ import {
   verifyKeyMiddleware,
 } from 'discord-interactions';
 
-import { add, remove, nominate, end, pickup, nominate, rockTheVote } from './pickup-game.js';
+import { add, remove, nominate, end, pickup, rockTheVote } from './pickup-game.js';
 
 // Create an express app
 const app = express();
