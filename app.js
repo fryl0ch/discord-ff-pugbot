@@ -71,11 +71,11 @@ client.on("messageCreate", message => {
   if(message.content.startsWith("!")){
     const message_cmd = message.content.split(' ')[0].replace('!','');
 
-    const the_command = client.commands.findKey((command) => command.data.name === message_cmd);
+    const the_command = client.commands.find((command) => command.data.name === message_cmd);
 
     if (the_command)
     {
-      //message.channel.send(`command '${message.content}' recieved from ${message.author.username}`);
+      message.channel.send(`command '${message.content}' recieved from ${message.author.username}`);
       message.reply(the_command.execute(message));
     }
     else
