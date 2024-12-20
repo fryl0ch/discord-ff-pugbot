@@ -65,11 +65,11 @@ client.on(Events.InteractionCreate, async interaction => {
 
 client.on("messageCreate", message => {
 
-  console.log('messageCreate', message.content);
+  
 
     if(message.content.startsWith("!")){
-        message.channel.send('!command recieved from ' + message.author.username );
-
+      console.log(message.author.username, `[${message.author.globalname}]:`, message.content);
+      message.channel.send(`command '${message.content}' recieved from ${message.author.username}`);
     }
 });
 
