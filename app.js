@@ -71,7 +71,7 @@ client.on("messageCreate", message => {
   if(message.content.startsWith("!")){
     console.log(message.author.username, `[${message.author.global_name}]:`, message.content);
     
-    if (client.commands.includes(message.content.split()[0].replace('!','')))
+    if (client.commands.find(command => command.name === message.content.split()[0].replace('!','')))
       message.channel.send(`command '${message.content}' recieved from ${message.author.username}`);
     else
       message.channel.send(`command '${message.content}' not found`);
