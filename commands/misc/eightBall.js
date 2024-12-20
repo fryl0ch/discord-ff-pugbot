@@ -8,10 +8,6 @@ export const execute = async function (interaction) {
   await interaction.reply(eightBall());
 }
 
-export function run() {
-  return eightBall();
-}
-
 export function eightBall()
 {
   const options = {
