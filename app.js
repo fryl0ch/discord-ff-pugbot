@@ -73,10 +73,10 @@ client.on("messageCreate", message => {
 
     the_command = client.commands.findKey((command) => command.data.name === message_cmd);
 
-    if (the_command)
+    if (client.commands.findKey((command) => command.data.name === message_cmd))
     {
       //message.channel.send(`command '${message.content}' recieved from ${message.author.username}`);
-      message.reply(the_command.run());
+      message.reply(`command '${message.content}' recieved from ${message.author.username}`);
     }
     else
       message.channel.send(`404 command '${message.content}' not found`);
