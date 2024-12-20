@@ -1,5 +1,5 @@
 import { REST, Routes } from 'discord.js';
-import { clientId, guildId, token } from './config.json';
+import { clientId, guildId, token } from './config.json' with { type: "json" };
 import fs from 'node:fs';
 import path from 'node:path';
 
