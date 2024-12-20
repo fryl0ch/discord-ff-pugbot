@@ -5,6 +5,11 @@ import token from './config.json' with { type: "json" };
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
+
+import Module from "node:module";
+const require = Module.createRequire(import.meta.url);
+const __dirname = import.meta.dirname;
+
 client.commands = new Collection();
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
@@ -23,8 +28,7 @@ for (const folder of commandFolders) {
   }
 }
 
-const eventsPath = path.join(__dirname, 'events');
-const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
 
 for (const file of eventFiles) {
   const filePath = path.join(eventsPath, file);
