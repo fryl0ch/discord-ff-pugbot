@@ -71,12 +71,12 @@ client.on("messageCreate", message => {
   if(message.content.startsWith("!")){
     const message_cmd = message.content.split(' ')[0].replace('!','');
 
-    the_command = client.commands.findKey((command) => command.data.name === message_cmd);
+    const the_command = client.commands.findKey((command) => command.data.name === message_cmd);
 
-    if (client.commands.findKey((command) => command.data.name === message_cmd))
+    if (the_command)
     {
       //message.channel.send(`command '${message.content}' recieved from ${message.author.username}`);
-      message.reply(`command '${message.content}' recieved from ${message.author.username}`);
+      message.reply(the_command.run());
     }
     else
       message.channel.send(`404 command '${message.content}' not found`);
