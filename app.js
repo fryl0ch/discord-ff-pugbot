@@ -1,126 +1,76 @@
-import 'dotenv/config';
-import express from 'express';
-import {
-  InteractionType,
-  InteractionResponseType,
-  verifyKeyMiddleware,
-} from 'discord-interactions';
+const fs = require('node:fs');
+const path = require('node:path');
+const { Client, Collection, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
+const { token } = require('./config.json');
 
-import { add, remove, nominate, end, pickup, rockTheVote } from './pickup-game.js';
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-// Create an express app
-const app = express();
-// Get port, or default to 3000
-const PORT = process.env.PORT || 3000;
+client.commands = new Collection();
+const foldersPath = path.join(__dirname, 'commands');
+const commandFolders = fs.readdirSync(foldersPath);
 
-/**
- * Interactions endpoint URL where Discord will send HTTP requests
- * Parse request body and verifies incoming requests using discord-interactions package
- */
-app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
-  // Interaction type and data
-  const { type, data } = req.body;
-
-  /**
-   * Handle verification requests
-   */
-  if (type === InteractionType.PING) {
-    return res.send({ type: InteractionResponseType.PONG });
-  }
-
-  /**
-   * Handle slash command requests
-   * See https://discord.com/developers/docs/interactions/application-commands#slash-commands
-   */
-  if (type === InteractionType.APPLICATION_COMMAND) {
-    const { name } = data;
-
-    console.log('APPLICATION_COMMAND recived: ', name);
-
-    // "pickup" command
-    if (name === 'pickup') {
-      // Send a message into the channel where command was triggered from
-      return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          content: pickup(),
-        },
-      });
-    }
-
-    // Slash command with name of "test"
-    if (data.name === 'nominate') {
-      // Send a modal as response
-      return res.send({
-        type: InteractionResponseType.MODAL,
-        data: {
-          custom_id: 'nominate_modal',
-          title: 'nominate',
-          components: [
-            {
-              // Text inputs must be inside of an action component
-              type: MessageComponentTypes.ACTION_ROW,
-              components: [
-                {
-                  // See https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-structure
-                  type: MessageComponentTypes.INPUT_TEXT,
-                  custom_id: 'nominate_modal_input_text',
-                  style: 1,
-                  label: 'nominate a map',
-                },
-              ],
-            },
-            {
-              type: MessageComponentTypes.ACTION_ROW,
-              components: [
-                {
-                  type: MessageComponentTypes.INPUT_TEXT,
-                  custom_id: 'my_longer_text',
-                  // Bigger text box for input
-                  style: 2,
-                  label: 'Type some (longer) text',
-                },
-              ],
-            },
-          ],
-        },
-      });
-    }
-
-    console.error(`unknown command: ${name}`);
-    return res.status(400).json({ error: 'unknown command' });
-  }
-
-  /**
-   * Handle modal submissions
-   */
-  if (type === InteractionType.MODAL_SUBMIT) {
-    // custom_id of modal
-    const modalId = data.custom_id;
-    // user ID of member who filled out modal
-    const userId = req.body.member.user.id;
-
-    if (modalId === 'my_modal') {
-      let modalValues = '';
-      // Get value of text inputs
-      for (let action of data.components) {
-        let inputComponent = action.components[0];
-        modalValues += `${inputComponent.custom_id}: ${inputComponent.value}\n`;
-      }
-
-      return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          content: `<@${userId}> typed the following (in a modal):\n\n${modalValues}`,
-        },
-      });
+for (const folder of commandFolders) {
+  const commandsPath = path.join(foldersPath, folder);
+  const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+  for (const file of commandFiles) {
+    const filePath = path.join(commandsPath, file);
+    const command = require(filePath);
+    if ('data' in command && 'execute' in command) {
+      client.commands.set(command.data.name, command);
+    } else {
+      console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
     }
   }
+}
 
-  console.error('unknown interaction type', type);
-  return res.status(400).json({ error: 'unknown interaction type' });
+const eventsPath = path.join(__dirname, 'events');
+const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+
+for (const file of eventFiles) {
+  const filePath = path.join(eventsPath, file);
+  const event = require(filePath);
+  if (event.once) {
+    client.once(event.name, (...args) => event.execute(...args));
+  } else {
+    client.on(event.name, (...args) => event.execute(...args));
+  }
+}
+
+client.once(Events.ClientReady, readyClient => {
+  console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
-app.listen(PORT, () => {
-  console.log('Listening on port', PORT);
+client.on(Events.InteractionCreate, async interaction => {
+  if (!interaction.isChatInputCommand()) return;
+  const command = interaction.client.commands.get(interaction.commandName);
+
+  if (!command) {
+    console.error(`No command matching ${interaction.commandName} was found.`);
+    return;
+  }
+
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
+    } else {
+      await interaction.reply({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
+    }
+  }
 });
+
+client.on("message", message => {
+    if(message.content.startsWith("!")){
+        message.channel.send('!command recieved from ' + message.author.username );
+
+    } else if (message.content.startsWith(prefix + "avatar")) {
+        message.reply(message.author.avatarURL);
+
+    }
+});
+
+
+
+client.login(token);
