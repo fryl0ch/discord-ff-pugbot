@@ -1,7 +1,7 @@
-const fs = require('node:fs');
-const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
-const { token } = require('./config.json');
+import { fs } from 'node:fs';
+import { path } from 'node:path';
+import { Client, Collection, Events, GatewayIntentBits, MessageFlags } from 'discord.js';
+import { token } from './config.json';
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
