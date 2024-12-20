@@ -69,14 +69,17 @@ client.on("messageCreate", message => {
     return;
 
   if(message.content.startsWith("!")){
-    console.log(message.author.username, `[${message.author.global_name}]:`, message.content);
-    console.log(message.content.split(' ')[0].replace('!',''));
-    console.log(client.commands);
+    const message_cmd = message.content.split(' ')[0].replace('!','');
 
-    if (client.commands.findKey((command) => command.data.name === message.content.split(' ')[0].replace('!','')))
-      message.channel.send(`command '${message.content}' recieved from ${message.author.username}`);
+    the_command = client.commands.findKey((command) => command.data.name === message_cmd);
+
+    if (the_command)
+    {
+      //message.channel.send(`command '${message.content}' recieved from ${message.author.username}`);
+      the_command.execute();
+    }
     else
-      message.channel.send(`command '${message.content}' not found`);
+      message.channel.send(`404 command '${message.content}' not found`);
   }
 });
 
