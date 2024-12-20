@@ -1,14 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { Client, Collection, Events, GatewayIntentBits, MessageFlags } from 'discord.js';
-import token from './config.json' with { type: "json" };
-
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-
-
 import Module from "node:module";
 const require = Module.createRequire(import.meta.url);
 const __dirname = import.meta.dirname;
+
+const { token } = require('./config.json');
+import { Client, Collection, Events, GatewayIntentBits, MessageFlags } from 'discord.js';
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.commands = new Collection();
 const foldersPath = path.join(__dirname, 'commands');
