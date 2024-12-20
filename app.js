@@ -6,7 +6,7 @@ const __dirname = import.meta.dirname;
 
 const { token } = require('./config.json');
 import { Client, Collection, Events, GatewayIntentBits, MessageFlags } from 'discord.js';
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
 client.commands = new Collection();
 const foldersPath = path.join(__dirname, 'commands');
