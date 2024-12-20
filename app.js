@@ -63,15 +63,12 @@ client.on(Events.InteractionCreate, async interaction => {
   }
 });
 
-client.on("message", message => {
+client.on("messageCreate", message => {
 
-  console.log('message', message.content);
+  console.log('messageCreate', message.content);
 
     if(message.content.startsWith("!")){
         message.channel.send('!command recieved from ' + message.author.username );
-
-    } else if (message.content.startsWith(prefix + "avatar")) {
-        message.reply(message.author.avatarURL);
 
     }
 });
