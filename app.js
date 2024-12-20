@@ -64,6 +64,9 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 client.on("message", message => {
+
+  console.log('message', message.content);
+
     if(message.content.startsWith("!")){
         message.channel.send('!command recieved from ' + message.author.username );
 
