@@ -2,10 +2,17 @@ import { SlashCommandBuilder } from 'discord.js';
 
 export const data = new SlashCommandBuilder()
     .setName('8ball')
-    .setDescription('Consult the all-knowing oracle of wisdom');
+    .setDescription('Consult the all-knowing oracle of wisdom')
+    .addStringOption(option =>
+      option.setName('question')
+        .setDescription('The question upon which you would like to seek the guidance of the oracle')
+        .setMaxLength(420));
 
 export const execute = async function (interaction) {
-  await interaction.reply(eightBall());
+  let prefix = "";
+  if (interaction.options.getString('question'))
+    prefix += interaction.options.getString('question') + " ";
+  await interaction.reply(prefix + eightBall());
 }
 
 export function eightBall()
