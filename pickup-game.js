@@ -86,7 +86,7 @@ class PickupGame {
           else
             return true;
         });
-        return `${player} has left the building`
+        return `${player} has left the pickup (${this.pool.pool.length}/${this.team_size})`
       }
       else
         return `${player} isn't even added!`;
