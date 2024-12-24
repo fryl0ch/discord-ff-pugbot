@@ -10,8 +10,9 @@ export const data = new SlashCommandBuilder()
 
 export const execute = async function (interaction) {
   let prefix = "";
-  if (interaction.options.getString('question'))
-    prefix += '"' + interaction.options.getString('question') + '"';
+  let question = interaction.options.getString('question')
+  if (question)
+    prefix += '"' + interaction.options.getString('question') + (question.endsWith('?') ? '' : '?') + '" ';
   await interaction.reply(prefix + eightBall());
 }
 
