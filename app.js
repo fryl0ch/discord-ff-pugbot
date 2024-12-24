@@ -6,6 +6,7 @@ const __dirname = import.meta.dirname;
 
 const { token } = require('./config.json');
 import { Client, Collection, Events, GatewayIntentBits, MessageFlags } from 'discord.js';
+
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
 client.commands = new Collection();
@@ -29,6 +30,7 @@ for (const folder of commandFolders) {
 const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
 
 for (const file of eventFiles) {
+  const eventsPath = path.join(__dirname, 'events');
   const filePath = path.join(eventsPath, file);
   const event = require(filePath);
   if (event.once) {
@@ -64,7 +66,6 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 client.on("messageCreate", message => {
-
   if(message.author.bot) // YO
     return;
 
@@ -82,7 +83,5 @@ client.on("messageCreate", message => {
       message.channel.send(`404 command '${message.content}' not found`);
   }
 });
-
-
 
 client.login(token);

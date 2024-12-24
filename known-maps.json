@@ -127,5 +127,5 @@
   "ff_2fort": {" description":  "ff_2fort", "aliases": ["2fort", "mac2fort"] },
   "ff_propinquity_b4": {" description":  "ff_propinquity_b4", "aliases": ["prop", "propinquity", "porp", "grim", "grimmeltdown", "meltdown"] },
   "ff_boketto_b1": {" description":  "ff_boketto_b1", "aliases": ["boketto"] },
-  "ff_hydro_b1": {" description":  "ff_hydro_b1", "aliases": ["hydro"] },
+  "ff_hydro_b1": {" description":  "ff_hydro_b1", "aliases": ["hydro"] }
 }
