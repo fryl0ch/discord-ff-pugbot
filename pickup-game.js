@@ -35,13 +35,18 @@ class PickupGame {
   };
 
   add(player) {
-    if (!this.pool.pool.includes(player))
-    {
-      this.pool.pool.push(player)
-      return `${player} has joined the pickup! ${this.pool.pool.length}/${this.team_size}`;
-    }
+    if (!this.started)
+      return 'there is no pickup started';
     else
-      return `${player} is already in the pool!`
+    {
+      if (!this.pool.pool.includes(player))
+      {
+        this.pool.pool.push(player)
+        return `${player} has joined the pickup! ${this.pool.pool.length}/${this.team_size}`;
+      }
+      else
+        return `${player} is already in the pool!`
+    }
   }
 
   teams() {
@@ -64,6 +69,9 @@ class PickupGame {
   }
 
   end() {
+    if (!this.started)
+      return 'there is no pickup started';
+
     this.started = false;
     this.nominated = [];
     this.pool = {
@@ -72,7 +80,7 @@ class PickupGame {
       pool: [] // player not picked yet, or pug not started yet and pug still filling
     };
     this.team_size = 8;
-    console.log('pickup ended');
+    return 'pickup ended';
   }
 
   remove(player) {
