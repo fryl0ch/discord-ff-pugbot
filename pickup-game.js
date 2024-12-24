@@ -35,7 +35,7 @@ class PickupGame {
   };
 
   add(player) {
-    if (!this.pool.includes(player))
+    if (!this.pool.pool.includes(player))
     {
       this.pool.pool.push(player)
       return `${player} has joined the pickup! ${this.pool.pool.length}/${this.team_size}`;
@@ -54,6 +54,13 @@ class PickupGame {
   start() {
     this.started = true;
     console.log('pickup started');
+  }
+
+  isFull() {
+    if (this.pool.pool.length === this.team_size)
+      return true;
+    else
+      return false;
   }
 
   end() {
