@@ -76,7 +76,7 @@ client.on("messageCreate", message => {
     if (the_command)
     {
       message.channel.send(`command '${message.content}' recieved from ${message.author.username}`);
-      message.reply(the_command.execute(message));
+      the_command.execute(message);
     }
     else
       message.channel.send(`404 command '${message.content}' not found`);
