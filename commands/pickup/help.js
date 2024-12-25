@@ -25,7 +25,7 @@ for (const folder of commandFolders) {
 	    } else {
 	      console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
 	    }
-	}
+		}
   }
 }
 
@@ -33,12 +33,26 @@ import { SlashCommandBuilder } from 'discord.js';
 
 export const data = new SlashCommandBuilder()
 		.setName('help')
-		.setDescription('view the list of available commands');
+		.setDescription('view the list of available commands')
+		.addStringOption(option =>
+      option.setName('command')
+        .setDescription('command to get more info about'));
+
 
 export const execute = async function (interaction) {
-	let response = "available commands:\n";
+	let response;
+	if (interaction.options)
+	{
+		let command = commands.find((command) => command.name === interaction.options.getString('command'));
+		response = "/" + command.name + ' - ' + command.description + "\n";
+		return await interaction.reply(response);
+	}
+	else
+	{
+		response = "available commands:\n";
 
-	for (let command of commands)
-		response += "/" + command.name + ' - ' + command.description + "\n";
-	return await interaction.reply(response);
+		for (let command of commands)
+			response += "/" + command.name + ' - ' + command.description + "\n";
+		return await interaction.reply(response);
+	}
 }
