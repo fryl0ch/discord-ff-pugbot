@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, MessageFlags} from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder} from 'discord.js';
 
 const now = function() {
   return (new Date()).getMilliseconds();
@@ -9,7 +9,14 @@ let startTime = now();
 let vote_results = [];
 
 let options = [];
-let options_kv = [];
+let options_kv = {};
+
+export var vote_counts = {};
+
+export function getVoteCountFor(value)
+{
+  return vote_counts[value].length;
+}
 
 const emojiOpts = {
   1: "1️⃣",
@@ -53,24 +60,34 @@ export const execute = async function (interaction) {
 
   const vote_reason = interaction.options.getString('question');
 
+  options = [];
+  options_kv = {};
 
-  // this ugly af
-  options = [ 
-    interaction.options.getString('option1'),
-    interaction.options.getString('option2'),
-    interaction.options.getString('option3'),
-    interaction.options.getString('option4'),
-    interaction.options.getString('option5')
-  ];
-
-  options_kv = {
-    vote_1:interaction.options.getString('option1'),
-    vote_2:interaction.options.getString('option2'),
-    vote_3:interaction.options.getString('option3'),
-    vote_4:interaction.options.getString('option4'),
-    vote_5:interaction.options.getString('option5'),
+  if (interaction.options.getString('option1')) 
+  {
+    options.push(interaction.options.getString('option1'));
+    options_kv.vote_1 = interaction.options.getString('option1');
   }
-
+  if (interaction.options.getString('option2'))
+  {
+    options.push(interaction.options.getString('option2'));
+    options_kv.vote_2 = interaction.options.getString('option2');
+  }
+  if (interaction.options.getString('option3'))
+  {
+    options.push(interaction.options.getString('option3'));
+    options_kv.vote_3 = interaction.options.getString('option3');
+  }
+  if (interaction.options.getString('option4'))
+  {
+    options.push(interaction.options.getString('option4'));
+    options_kv.vote_4 = interaction.options.getString('option4');
+  }
+  if (interaction.options.getString('option5'))
+  {
+    options.push(interaction.options.getString('option5'));
+    options_kv.vote_5 = interaction.options.getString('option5');
+  }
 
   const voteEmbed = new EmbedBuilder()
     .setColor(0x0099FF)
@@ -89,24 +106,26 @@ export const execute = async function (interaction) {
 
       const vote_button = new ButtonBuilder()
         .setCustomId(`vote_${counter}`)
-        .setLabel(vote_value)
+        .setLabel(vote_value + "(" + getVoteCountFor(vote_value) + ")")
         .setStyle(ButtonStyle.Secondary);
       vote_row.addComponents(vote_button);
       counter++;
     }
-  } else {
+  } 
+  else 
+  {
     const yes_vote_value = "✅ Yes!";
     const no_vote_value = "❌ No."
 
     options = [yes_vote_value, no_vote_value];
     options_kv = {vote_yes: yes_vote_value, vote_no: no_vote_value};
     const yes_vote_button = new ButtonBuilder()
-      .setCustomId(`vote_yes`)
-      .setLabel(yes_vote_value)
+      .setCustomId(`vote_1`)
+      .setLabel(yes_vote_value + "(" + getVoteCountFor(yes_vote_value) + ")")
       .setStyle(ButtonStyle.Secondary);
     const no_vote_button = new ButtonBuilder()
-      .setCustomId(`vote_no`)
-      .setLabel(no_vote_value)
+      .setCustomId(`vote_2`)
+      .setLabel(no_vote_value + "(" + getVoteCountFor(yes_vote_value) + ")")
       .setStyle(ButtonStyle.Secondary);
     vote_row.addComponents(yes_vote_button, no_vote_button);
   }
@@ -117,8 +136,8 @@ export const execute = async function (interaction) {
   });
 
   
-  let results = await listenForVotes(voteMessage, 7_000);
-  let vote_counts = {};
+  let results = await listenForVotes(voteMessage, voteEmbed, 7_000);
+  vote_counts = {};
   let resultsEmbed = new EmbedBuilder()
     .setColor(0x0099FF)
     //.setTitle(vote_reason)
@@ -150,15 +169,39 @@ export const execute = async function (interaction) {
   });
 }
 
-const listenForVotes = async function(voteMessage, duration_ms) {
+const updateVoteCounts = async function(voteMessage, voteEmbed)
+{
+  let counter = 1;
+  let vote_row = new ActionRowBuilder();
+  for (let option of options.filter(o => o))
+  {
+    let vote_value = options_kv[option];
+    voteEmbed.addFields({name: " ", value: vote_value});
+
+    const vote_button = new ButtonBuilder()
+      .setCustomId(`vote_${counter}`)
+      .setLabel(vote_value + "(" + getVoteCountFor(vote_value) + ")")
+      .setStyle(ButtonStyle.Secondary);
+    vote_row.addComponents(vote_button);
+    counter++;
+  }
+  await voteMessage.edit({
+    embeds: [voteEmbed],
+    components: [vote_row]
+  });
+}
+
+const listenForVotes = async function(voteMessage, voteEmbed, duration_ms) {
   try {
     let voteWatcher = await voteMessage.awaitMessageComponent({time: (duration_ms - (startTime - now())) });
-    let previousVote = vote_results.find((vote) => vote.voter === voteWatcher.member.displayName);
-    if (previousVote)
-      previousVote.vote = voteWatcher.customId;
-    else
+    // let you vote multiple times to test this...
+    // let previousVote = vote_results.find((vote) => vote.voter === voteWatcher.member.displayName);
+    // if (previousVote)
+    //   previousVote.vote = voteWatcher.customId;
+    // else
       vote_results.push({voter: voteWatcher.member.displayName, vote: voteWatcher.customId});
     await voteWatcher.deferUpdate();
+    updateVoteCounts(voteMessage, voteEmbed);
     let elapsed_time = now() - startTime;
 
     if (elapsed_time < duration_ms)
