@@ -108,22 +108,32 @@ class PickupGame {
   }
 
   nominate(map, player) {
-    if (this.nominated.length < this.max_nominations)
+    if (this.started === true)
     {
-      if (Object.keys(known_maps).includes(map)) {
-        this.nominated.push({map: map, nominator: player});
-      }
-      else {
-        const aliased = Object.keys(known_maps).filter((m) => {
-          return known_maps[m].aliases.includes(map);
-        });
+      if (this.pool.pool.includes(player))
+      {
+        if (this.nominated.length < this.max_nominations)
+        {
+          if (Object.keys(known_maps).includes(map)) {
+            this.nominated.push({map: map, nominator: player});
+          }
+          else {
+            const aliased = Object.keys(known_maps).filter((m) => {
+              return known_maps[m].aliases.includes(map);
+            });
 
-        if (aliased.length === 1)
-          this.nominated.push({map: aliased.pop(), nominator: player});
-        else
-          throw "Cant find a map by that name, sorry";
+            if (aliased.length === 1)
+              this.nominated.push({map: aliased.pop(), nominator: player});
+            else
+              throw "Cant find a map by that name, sorry";
+          }
+        }
       }
+      else
+        return "you have to be !added to !nominate";
     }
+    else
+      return "can't !nominate with no pickup started. !pickup to start one";  
   }
 };
 
