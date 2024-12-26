@@ -53,6 +53,8 @@ export const execute = async function (interaction) {
 
   const vote_reason = interaction.options.getString('question');
 
+
+  // this ugly af
   options = [ 
     interaction.options.getString('option1'),
     interaction.options.getString('option2'),
