@@ -13,21 +13,13 @@ let options_kv = {};
 
 let vote_reason;
 
-export var vote_counts = {};
+let vote_duration = 30; // in seconds
 
 export function getVoteCountFor(value)
 {
   if (vote_results[value])
     return vote_results[value].length;
   else return 0;
-}
-
-const emojiOpts = {
-  1: "1️⃣",
-  2: "2️⃣",
-  3: "3️⃣",
-  4: "4️⃣",
-  5: "5️⃣"
 }
 
 export const data = new SlashCommandBuilder()
@@ -56,7 +48,13 @@ export const data = new SlashCommandBuilder()
     .addStringOption(option =>
       option.setName('option5')
         .setDescription('The fifth option for the vote')
-        .setMaxLength(420).setRequired(false));
+        .setMaxLength(420).setRequired(false))
+    .addIntegerOption(option =>
+      option.setName('duration')
+        .setDescription('The amount of time the poll is open for in seconds (default 30)')
+        .setMinValue(5) // min 5 seconds
+        .setMaxValue(300) // max 5 minutes
+        .setRequired(false));
 
 export const execute = async function (interaction) {
   startTime = now();
@@ -92,6 +90,9 @@ export const execute = async function (interaction) {
     options.push(interaction.options.getString('option5'));
     options_kv.vote_5 = interaction.options.getString('option5');
   }
+
+  if (interaction.options.getInteger('duration'))
+    vote_duration = Number.parseInt(interaction.options.getInteger('duration'));
 
   const voteEmbed = new EmbedBuilder()
     .setColor(0x0099FF)
@@ -138,8 +139,12 @@ export const execute = async function (interaction) {
     components: [vote_row]
   });
 
-  vote_counts = {};
-  listenForVotes(voteMessage, 5_000);
+  for (let option of Object.keys(options_kv))
+  {
+    vote_results[option] = [];
+  }
+
+  listenForVotes(voteMessage, vote_duration*1_000);
 }
 
 const updateVoteCounts = async function(voteMessage, done=false)
@@ -147,7 +152,7 @@ const updateVoteCounts = async function(voteMessage, done=false)
   let resultsEmbed = new EmbedBuilder()
     .setColor(0x0099FF)
     .setTitle(vote_reason);
-  if (Object.keys(vote_results).length > 0)
+  if (Object.keys(vote_results).length)
   {
     for (let result of Object.keys(vote_results))
     {
@@ -174,7 +179,6 @@ const updateVoteCounts = async function(voteMessage, done=false)
     }
   }
 
-  //await interaction.editReply("Results:\n" + vote_counts_str);
   if (!done)
   {
     return await voteMessage.edit({
@@ -194,7 +198,12 @@ const updateVoteCounts = async function(voteMessage, done=false)
 const listenForVotes = async function(voteMessage, duration_ms) {
   try {
     let voteWatcher = await voteMessage.awaitMessageComponent({time: (duration_ms - (startTime - now())) });
-    // let you vote multiple times to test this...
+    
+    // only one vote per voter
+    for (let option of Object.keys(vote_results))
+      if (vote_results[option].includes(voteWatcher.member.displayName))
+        vote_results[option] = vote_results[option].filter(o => o !== voteWatcher.member.displayName);
+
     if (! vote_results[voteWatcher.customId] ) vote_results[voteWatcher.customId] = [];
     vote_results[voteWatcher.customId].push(voteWatcher.member.displayName);
     await voteWatcher.deferUpdate();
