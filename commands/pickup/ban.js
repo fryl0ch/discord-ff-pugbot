@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder, MessageFlags } from 'discord.js';
 
 export const data = new SlashCommandBuilder()
 		.setName('ban')
@@ -27,7 +27,7 @@ export const execute = async function (interaction) {
 		.addComponents(cancel, confirm);
 
 	let response = await interaction.reply({
-		content: `Are you sure you want to ban ${target} for reason: ${reason}?`,
+		content: `Are you sure you want to ban ${target} for reason: '${reason}'?`,
 		components: [row],
 	});
 
@@ -37,13 +37,13 @@ export const execute = async function (interaction) {
 		const confirmation = await response.awaitMessageComponent({ filter: collectorFilter, time: 60_000 });
 
 		if (confirmation.customId === 'confirm') {
-			return await confirmation.update({ content: `${target.username} has been banned for reason: ${reason}`, components: [] });
+			await response.edit({ content: `${target.username} has been banned for reason: ${reason}`, components: [] });
 		} else if (confirmation.customId === 'cancel') {
-			return await confirmation.update({ content: 'Action cancelled', components: [] });
+			await response.delete();
 		}
 	} catch (error) {
 		console.error(error);
-		return await interaction.editReply({ content: 'Confirmation not received within 1 minute, cancelling', components: [] });
+		await response.delete();
 	}
 };
 
