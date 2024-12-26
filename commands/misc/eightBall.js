@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from 'discord.js';
 
 export const data = new SlashCommandBuilder()
     .setName('8ball')
-    .setDescription('Consult the all-knowing oracle of wisdom')
+    .setDescription('consult the all-knowing oracle of wisdom')
     .addStringOption(option =>
       option.setName('question')
         .setDescription('The question upon which you would like to seek the guidance of the oracle')
