@@ -10,7 +10,6 @@ export const execute = async function (interaction) {
 	await interaction.reply(pickup.remove(interaction.member.displayName));
 	if (pickup.pool.pool.length === 0) 
 	{
-		await interaction.followUp("pool is empty.");
-		await interaction.followUp(pickup.end());
+		await interaction.followUp("pool is empty." + pickup.end());
 	}
 }

@@ -7,6 +7,5 @@ export const data = new SlashCommandBuilder()
 		.setDescription('end the currently running pickup');
 
 export const execute = async function (interaction) {
-	pickup.end();
-	await interaction.reply('pickup ended');
+	await interaction.reply(pickup.end());
 }
