@@ -52,5 +52,5 @@ export const execute = async function (interaction) {
 	}
 
 	let formattedPrice = new Intl.NumberFormat('en-US').format(lastPrices[currency])
-	await interaction.reply("1₿ = " + symbols[currency] + formattedPrice + " " + currency);
+	await interaction.reply("1 ₿ == " + symbols[currency] + formattedPrice + " " + currency);
 }
