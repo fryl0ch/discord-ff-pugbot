@@ -8,7 +8,8 @@ export const data = new SlashCommandBuilder()
 		.addStringOption(option =>
 	      option.setName('map')
 	        .setDescription('The name of the map you want to nominate')
-	        .setMaxLength(420));
+	        .setMaxLength(420)
+	        .setRequired(true));
 
 export const execute = async function (interaction) {
 	let map = interaction.options.getString('map')

@@ -116,14 +116,25 @@ class PickupGame {
         {
           if (Object.keys(known_maps).includes(map)) {
             this.nominated.push({map: map, nominator: player});
+            return `${player} has nominated '${map}'`;
           }
           else {
             const aliased = Object.keys(known_maps).filter((m) => {
-              return known_maps[m].aliases.includes(map);
+              if (known_maps[m].aliases)
+                if (known_maps[m].aliases.includes(map))
+                  return true;
+                else
+                  return false;
+              else
+                return false;
             });
 
             if (aliased.length === 1)
-              this.nominated.push({map: aliased.pop(), nominator: player});
+            {
+              let actual_map = aliased.pop();
+              this.nominated.push({map:actual_map , nominator: player});
+              return `${player} has nominated '${map}' (${actual_map})`;
+            }
             else
               throw "Cant find a map by that name, sorry";
           }
