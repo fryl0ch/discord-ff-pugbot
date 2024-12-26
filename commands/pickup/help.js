@@ -3,7 +3,14 @@ import path from 'node:path';
 import Module from "node:module";
 const require = Module.createRequire(import.meta.url);
 const __dirname = import.meta.dirname;
+import { SlashCommandBuilder } from 'discord.js';
 
+export const data = new SlashCommandBuilder()
+		.setName('help')
+		.setDescription('view the list of available commands')
+		.addStringOption(option =>
+      option.setName('command')
+        .setDescription('command to get more info about'));
 
 const commands = [];
 // Grab all the command folders from the commands directory you created earlier
@@ -29,23 +36,13 @@ for (const folder of commandFolders) {
   }
 }
 
-import { SlashCommandBuilder } from 'discord.js';
-
-export const data = new SlashCommandBuilder()
-		.setName('help')
-		.setDescription('view the list of available commands')
-		.addStringOption(option =>
-      option.setName('command')
-        .setDescription('command to get more info about'));
-
-
 export const execute = async function (interaction) {
 	let response;
-	if (interaction.options)
+	if (interaction.options && interaction.options.getString('command'))
 	{
 		let command = commands.find((command) => command.name === interaction.options.getString('command'));
 		response = "/" + command.name + ' - ' + command.description + "\n";
-		return await interaction.reply(response);
+		await interaction.reply(response);
 	}
 	else
 	{
@@ -53,6 +50,6 @@ export const execute = async function (interaction) {
 
 		for (let command of commands)
 			response += "/" + command.name + ' - ' + command.description + "\n";
-		return await interaction.reply(response);
+		await interaction.reply(response);
 	}
 }
