@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 
 import { pickup } from '../../pickup-game.js'
+import add from './add.js';
 
 export const data = new SlashCommandBuilder()
 		.setName('pickup')
@@ -8,5 +9,5 @@ export const data = new SlashCommandBuilder()
 
 export const execute = async function (interaction) {
 	pickup.start();
-	await interaction.reply('pickup started');
+	return await add.execute(await interaction.reply('pickup started'));
 }

@@ -9,3 +9,5 @@ export const data = new SlashCommandBuilder()
 export const execute = async function (interaction) {
 	return await interaction.reply(pickup.add(interaction.member.displayName));
 }
+
+export const add = execute;
