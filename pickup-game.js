@@ -107,7 +107,8 @@ class PickupGame {
     //TBI
   }
 
-  nominate(map, player) {
+  nominate(nomination, player) {
+    let map = map.toLowerCase();
     if (this.started === true)
     {
       if (this.pool.pool.includes(player))
@@ -116,7 +117,7 @@ class PickupGame {
         {
           if (Object.keys(known_maps).includes(map)) {
             this.nominated.push({map: map, nominator: player});
-            return `${player} has nominated '${map}'`;
+            return `${player} has nominated '${nomination}'`;
           }
           else {
             const aliased = Object.keys(known_maps).filter((m) => {
