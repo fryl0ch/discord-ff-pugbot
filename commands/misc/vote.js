@@ -6,16 +6,20 @@ const now = function() {
 
 
 let startTime = now();
-let vote_results = [];
+let vote_results = {};
 
 let options = [];
 let options_kv = {};
+
+let vote_reason;
 
 export var vote_counts = {};
 
 export function getVoteCountFor(value)
 {
-  return vote_counts[value].length;
+  if (vote_results[value])
+    return vote_results[value].length;
+  else return 0;
 }
 
 const emojiOpts = {
@@ -58,7 +62,7 @@ export const execute = async function (interaction) {
   startTime = now();
   vote_results = [];
 
-  const vote_reason = interaction.options.getString('question');
+  vote_reason = interaction.options.getString('question');
 
   options = [];
   options_kv = {};
@@ -101,12 +105,11 @@ export const execute = async function (interaction) {
   {
     for (let option of options.filter(o => o))
     {
-      let vote_value = `${emojiOpts[counter]} ${option}`;
-      voteEmbed.addFields({name: " ", value: vote_value});
+      voteEmbed.addFields({name: " ", value: option});
 
       const vote_button = new ButtonBuilder()
         .setCustomId(`vote_${counter}`)
-        .setLabel(vote_value + "(" + getVoteCountFor(vote_value) + ")")
+        .setLabel(option + " (" + getVoteCountFor(option) + ")")
         .setStyle(ButtonStyle.Secondary);
       vote_row.addComponents(vote_button);
       counter++;
@@ -114,18 +117,18 @@ export const execute = async function (interaction) {
   } 
   else 
   {
-    const yes_vote_value = "✅ Yes!";
-    const no_vote_value = "❌ No."
+    const yes_vote_value = "Yes ✅";
+    const no_vote_value = "No ❌";
 
     options = [yes_vote_value, no_vote_value];
-    options_kv = {vote_yes: yes_vote_value, vote_no: no_vote_value};
+    options_kv = {vote_1: yes_vote_value, vote_2: no_vote_value};
     const yes_vote_button = new ButtonBuilder()
       .setCustomId(`vote_1`)
-      .setLabel(yes_vote_value + "(" + getVoteCountFor(yes_vote_value) + ")")
+      .setLabel(yes_vote_value)
       .setStyle(ButtonStyle.Secondary);
     const no_vote_button = new ButtonBuilder()
       .setCustomId(`vote_2`)
-      .setLabel(no_vote_value + "(" + getVoteCountFor(yes_vote_value) + ")")
+      .setLabel(no_vote_value)
       .setStyle(ButtonStyle.Secondary);
     vote_row.addComponents(yes_vote_button, no_vote_button);
   }
@@ -135,85 +138,81 @@ export const execute = async function (interaction) {
     components: [vote_row]
   });
 
-  
-  let results = await listenForVotes(voteMessage, voteEmbed, 7_000);
   vote_counts = {};
+  listenForVotes(voteMessage, 5_000);
+}
+
+const updateVoteCounts = async function(voteMessage, done=false)
+{
   let resultsEmbed = new EmbedBuilder()
     .setColor(0x0099FF)
-    //.setTitle(vote_reason)
     .setTitle(vote_reason);
-  if (results.length > 0)
+  if (Object.keys(vote_results).length > 0)
   {
-    for (let vote of results)
+    for (let result of Object.keys(vote_results))
     {
-      if (vote_counts[vote.vote])
-        vote_counts[vote.vote] += 1;
-      else
-        vote_counts[vote.vote] = 1;
-    }
-
-    for (let result of Object.keys(vote_counts))
-    {
-      resultsEmbed.addFields({name: " ", value: `${options_kv[result]} recieved ${vote_counts[result]} vote${vote_counts[result] > 1 ? 's' : ''}`});
+      resultsEmbed.addFields({name: " ", value: `${options_kv[result]} recieved ${getVoteCountFor(result)} vote${getVoteCountFor(result) > 1 ? 's' : ''}`});
     }
   }
   else
     resultsEmbed.addFields({name: " ", value: `no votes were cast`});
 
+  let vote_row = new ActionRowBuilder();
+
+  if (options.filter(o => o).length > 0)
+  {
+    let counter = 1;
+    for (let option of options)
+    {
+      //console.log('id:', counter, 'opt:', option);
+      const vote_button = new ButtonBuilder()
+        .setCustomId(`vote_${counter}`)
+        .setLabel(option)
+        .setStyle(ButtonStyle.Secondary);
+      vote_row.addComponents(vote_button);
+      counter++;
+    }
+  }
 
   //await interaction.editReply("Results:\n" + vote_counts_str);
-  //await interaction.channel.send("Voting has finished. \nResults: " + vote_counts_str);
-  await voteMessage.edit({
-    embeds: [resultsEmbed],
-    components: []
-  });
-}
-
-const updateVoteCounts = async function(voteMessage, voteEmbed)
-{
-  let counter = 1;
-  let vote_row = new ActionRowBuilder();
-  for (let option of options.filter(o => o))
+  if (!done)
   {
-    let vote_value = options_kv[option];
-    voteEmbed.addFields({name: " ", value: vote_value});
-
-    const vote_button = new ButtonBuilder()
-      .setCustomId(`vote_${counter}`)
-      .setLabel(vote_value + "(" + getVoteCountFor(vote_value) + ")")
-      .setStyle(ButtonStyle.Secondary);
-    vote_row.addComponents(vote_button);
-    counter++;
+    return await voteMessage.edit({
+      embeds: [resultsEmbed],
+      components: [vote_row] 
+    });
   }
-  await voteMessage.edit({
-    embeds: [voteEmbed],
-    components: [vote_row]
-  });
+  else
+  {
+    return await voteMessage.edit({
+      embeds: [resultsEmbed],
+      components: [] // remove vote buttons
+    });
+  }
 }
 
-const listenForVotes = async function(voteMessage, voteEmbed, duration_ms) {
+const listenForVotes = async function(voteMessage, duration_ms) {
   try {
     let voteWatcher = await voteMessage.awaitMessageComponent({time: (duration_ms - (startTime - now())) });
     // let you vote multiple times to test this...
-    // let previousVote = vote_results.find((vote) => vote.voter === voteWatcher.member.displayName);
-    // if (previousVote)
-    //   previousVote.vote = voteWatcher.customId;
-    // else
-      vote_results.push({voter: voteWatcher.member.displayName, vote: voteWatcher.customId});
+    if (! vote_results[voteWatcher.customId] ) vote_results[voteWatcher.customId] = [];
+    vote_results[voteWatcher.customId].push(voteWatcher.member.displayName);
     await voteWatcher.deferUpdate();
-    updateVoteCounts(voteMessage, voteEmbed);
+    await updateVoteCounts(voteMessage);
     let elapsed_time = now() - startTime;
 
     if (elapsed_time < duration_ms)
     {
-        await listenForVotes(voteMessage, (duration_ms - elapsed_time));
+      listenForVotes(voteMessage, (duration_ms - elapsed_time));
     }
   } catch (error) {
-    if (error.code === 'InteractionCollectorError')
-      return vote_results;
+    if (error.code === 'InteractionCollectorError') // out of time
+    {
+      console.log('voting finished');
+      let update = await updateVoteCounts(voteMessage, true);
+      await update.channel.send('Voting has ended.');
+    }
     else
       throw error;
   }
-
-  return vote_results;
 }
