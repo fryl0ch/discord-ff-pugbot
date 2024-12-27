@@ -1,18 +1,17 @@
 import { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder} from 'discord.js';
 
 const now = function() {
-  return (new Date()).getMilliseconds();
+  return (new Date()).valueOf();
 }
 
 
-let startTime = now();
+let startTime;
 let vote_results = {};
 
 let options = [];
 let options_kv = {};
 
 let vote_reason;
-
 let vote_duration = 30; // in seconds
 
 export function getVoteCountFor(value)
@@ -51,9 +50,9 @@ export const data = new SlashCommandBuilder()
         .setMaxLength(420).setRequired(false))
     .addIntegerOption(option =>
       option.setName('duration')
-        .setDescription('The amount of time the poll is open for in seconds (default 30)')
+        .setDescription('The amount of time the poll is open for in seconds (default 30s)')
         .setMinValue(5) // min 5 seconds
-        .setMaxValue(300) // max 5 minutes
+        .setMaxValue(1800) // max 30 minutes
         .setRequired(false));
 
 export const execute = async function (interaction) {
@@ -134,7 +133,8 @@ export const execute = async function (interaction) {
     vote_row.addComponents(yes_vote_button, no_vote_button);
   }
 
-  let voteMessage = await interaction.reply({
+  await interaction.reply('starting vote...');
+  let voteMessage = await interaction.channel.send({
     embeds: [voteEmbed],
     components: [vote_row]
   });
@@ -144,7 +144,7 @@ export const execute = async function (interaction) {
     vote_results[option] = [];
   }
 
-  listenForVotes(voteMessage, vote_duration*1_000);
+  await listenForVotes(voteMessage, vote_duration*1_000);
 }
 
 const updateVoteCounts = async function(voteMessage, done=false)
@@ -152,6 +152,12 @@ const updateVoteCounts = async function(voteMessage, done=false)
   let resultsEmbed = new EmbedBuilder()
     .setColor(0x0099FF)
     .setTitle(vote_reason);
+
+  if (!done)
+    resultsEmbed.addFields({name: " ", value: `⏳ time remaining: ${Math.round(( (vote_duration*1_000) - (now() - startTime) )/1000)} seconds`});
+  else
+    resultsEmbed.addFields({name: " ", value: `voting has ended.`});
+
   if (Object.keys(vote_results).length)
   {
     for (let result of Object.keys(vote_results))
@@ -197,8 +203,9 @@ const updateVoteCounts = async function(voteMessage, done=false)
 
 const listenForVotes = async function(voteMessage, duration_ms) {
   try {
-    let voteWatcher = await voteMessage.awaitMessageComponent({time: (duration_ms - (startTime - now())) });
-    
+    console.log('vote started ', 'duration_ms', duration_ms)
+    let voteWatcher = await voteMessage.awaitMessageComponent({time: (vote_duration*1_000) - (now() - startTime) });
+    voteWatcher.deferUpdate();
     // only one vote per voter
     for (let option of Object.keys(vote_results))
       if (vote_results[option].includes(voteWatcher.member.displayName))
@@ -206,20 +213,21 @@ const listenForVotes = async function(voteMessage, duration_ms) {
 
     if (! vote_results[voteWatcher.customId] ) vote_results[voteWatcher.customId] = [];
     vote_results[voteWatcher.customId].push(voteWatcher.member.displayName);
-    await voteWatcher.deferUpdate();
-    await updateVoteCounts(voteMessage);
-    let elapsed_time = now() - startTime;
+    await updateVoteCounts(voteMessage,false);
 
+    let elapsed_time = now() - startTime;
     if (elapsed_time < duration_ms)
     {
-      listenForVotes(voteMessage, (duration_ms - elapsed_time));
+      let time_left = ((vote_duration * 1_000) - elapsed_time);
+      console.log('vote recieved, listing for ' + time_left + " more ms");
+      await listenForVotes(voteMessage, time_left);
     }
   } catch (error) {
     if (error.code === 'InteractionCollectorError') // out of time
     {
-      console.log('voting finished');
-      let update = await updateVoteCounts(voteMessage, true);
-      await update.channel.send('Voting has ended.');
+      console.log('voting finished', error);
+      await updateVoteCounts(voteMessage, true);
+      await voteMessage.reply('Voting has ended.');
     }
     else
       throw error;
