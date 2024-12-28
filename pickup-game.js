@@ -156,7 +156,7 @@ class PickupGame {
               return `${player} has nominated '${map}' (${actual_map})`;
             }
             else
-              throw "Cant find a map by that name, sorry";
+              return "Cant find a map by that name, sorry";
           }
         }
       }
