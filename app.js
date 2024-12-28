@@ -5,7 +5,7 @@ const require = Module.createRequire(import.meta.url);
 const __dirname = import.meta.dirname;
 
 const { token } = require('./config.json');
-import { Client, Collection, Events, GatewayIntentBits, MessageFlags } from 'discord.js';
+import { Client, Collection, Events, GatewayIntentBits, MessageFlags} from 'discord.js';
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
@@ -69,6 +69,20 @@ client.on("messageCreate", message => {
   if(message.author.bot) // YO
     return;
 
+  const slashCommandOptionTypes = {
+    1: "SUB_COMMAND",
+    2: "SUB_COMMAND_GROUP",
+    3: "STRING",
+    4: "INTEGER",
+    5: "BOOLEAN",
+    6: "USER",
+    7: "CHANNEL",
+    8: "ROLE",
+    9: "MENTIONABLE",
+    10: "NUMBER",
+    11: "ATTACHMENT"
+  }
+
   if(message.content.startsWith("!")){
     const message_cmd = message.content.split(' ')[0].replace('!','');
 
@@ -76,12 +90,54 @@ client.on("messageCreate", message => {
 
     if (the_command)
     {
-      //message.channel.send(`command '${message.content}' recieved from ${message.author.username}`);
-      the_command.execute(message);
+      let passed_opts = parseOptsFromString(message.content).split(' ');
+
+      let parsed_opts = {};
+
+      for (let option of the_command.data.options)
+      {
+        let index = the_command.data.options.indexOf(option)+1;
+        if (['STRING', 'USER'].includes(slashCommandOptionTypes[option.type]))
+        {
+          parsed_opts[option.name] = passed_opts[index];
+        }
+        else if (slashCommandOptionTypes[option.type] === "INTEGER")
+        {
+          parsed_opts[option.name] = Number.parseInt(passed_opts[index]);
+        }
+        else if (slashCommandOptionTypes[option.type] === "NUMBER")
+        {
+          parsed_opts[option.name] = Number.parseFloat(passed_opts[index]);
+        }
+        else if (slashCommandOptionTypes[option.type] === "BOOLEAN")
+        {
+          parsed_opts[option.name] = (passed_opts[index].toLowerCase() === 'true');
+        }
+      }
+
+      the_command.execute(message, parsed_opts);
     }
     else
-      message.reply(`404 command '${message.content}' not found`);
+      message.reply({content: `command '${message.content}' not found`});
   }
 });
+
+function parseOptsFromString(commandString)
+{
+  let quotedRegex = /["'](.+)["']/;
+
+  let replacer = function (match, p1)
+  {
+    return p1.replaceAll(" ", "_");
+  }
+  // replace all spaces in a quoted value with _
+
+  commandString = commandString.replace(quotedRegex, replacer);
+
+  // split on " "
+  // replace _ with " " within string arguments
+  
+  return commandString;
+}
 
 client.login(token);

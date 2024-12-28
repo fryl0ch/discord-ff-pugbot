@@ -11,8 +11,17 @@ export const data = new SlashCommandBuilder()
 	        .setMaxLength(420)
 	        .setRequired(true));
 
-export const execute = async function (interaction) {
-	let map = interaction.options.getString('map')
+export const execute = async function (interaction, options=null) {
+	let map;
+	if (options)
+	{
+		map = options.map;
+	}
+	else
+	{
+		map = interaction.options.getString('map');
+	}
+
 	let nominator = interaction.member.displayName;
 	return await interaction.reply(pickup.nominate(map,nominator));
 }

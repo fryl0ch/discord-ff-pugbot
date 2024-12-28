@@ -67,6 +67,12 @@ export const data = new SlashCommandBuilder()
       option.setName('question')
         .setDescription('The reason for calling the vote')
         .setMaxLength(420).setRequired(true))
+    .addIntegerOption(option =>
+      option.setName('duration')
+        .setDescription('The amount of time the poll is open for in seconds (default 30s)')
+        .setMinValue(5) // min 5 seconds
+        .setMaxValue(1800) // max 30 minutes
+        .setRequired(false))
     .addStringOption(option =>
       option.setName('option1')
         .setDescription('The first option for the vote')
@@ -86,48 +92,76 @@ export const data = new SlashCommandBuilder()
     .addStringOption(option =>
       option.setName('option5')
         .setDescription('The fifth option for the vote')
-        .setMaxLength(420).setRequired(false))
-    .addIntegerOption(option =>
-      option.setName('duration')
-        .setDescription('The amount of time the poll is open for in seconds (default 30s)')
-        .setMinValue(5) // min 5 seconds
-        .setMaxValue(1800) // max 30 minutes
-        .setRequired(false));
+        .setMaxLength(420).setRequired(false));
 
-export const execute = async function (interaction) {
+export const execute = async function (interaction, options=null) {
   let the_poll = new Poll();
 
-  the_poll.vote_reason = interaction.options.getString('question');
+  if (options)
+  {
+    the_poll.vote_reason = options.question;
+    if (options.option1) 
+    {
+      the_poll.options.push(options.option1);
+      the_poll.options_kv.vote_1 = options.option1;
+    }
+    if (options.option2)
+    {
+      the_poll.options.push(options.option2);
+      the_poll.options_kv.vote_2 = options.option2;
+    }
+    if (options.option3)
+    {
+      the_poll.options.push(options.option3);
+      the_poll.options_kv.vote_3 = options.option3;
+    }
+    if (options.option4)
+    {
+      the_poll.options.push(options.option4);
+      the_poll.options_kv.vote_4 = options.option4;
+    }
+    if (options.option5)
+    {
+      the_poll.options.push(options.option5);
+      the_poll.options_kv.vote_5 = options.option5;
+    }
 
-  if (interaction.options.getString('option1')) 
-  {
-    the_poll.push(interaction.options.getString('option1'));
-    the_poll.vote_1 = interaction.options.getString('option1');
+    if (options.duration)
+      the_poll.vote_duration = options.duration;
   }
-  if (interaction.options.getString('option2'))
+  else
   {
-    the_poll.options.push(interaction.options.getString('option2'));
-    the_poll.options_kv.vote_2 = interaction.options.getString('option2');
-  }
-  if (interaction.options.getString('option3'))
-  {
-    the_poll.options.push(interaction.options.getString('option3'));
-    the_poll.options_kv.vote_3 = interaction.options.getString('option3');
-  }
-  if (interaction.options.getString('option4'))
-  {
-    the_poll.options.push(interaction.options.getString('option4'));
-    the_poll.options_kv.vote_4 = interaction.options.getString('option4');
-  }
-  if (interaction.options.getString('option5'))
-  {
-    the_poll.options.push(interaction.options.getString('option5'));
-    the_poll.options_kv.vote_5 = interaction.options.getString('option5');
-  }
+    the_poll.vote_reason = interaction.options.getString('question');
 
-  if (interaction.options.getInteger('duration'))
-    the_poll.vote_duration = Number.parseInt(interaction.options.getInteger('duration'));
+    if (interaction.options.getString('option1')) 
+    {
+      the_poll.push(interaction.options.getString('option1'));
+      the_poll.vote_1 = interaction.options.getString('option1');
+    }
+    if (interaction.options.getString('option2'))
+    {
+      the_poll.options.push(interaction.options.getString('option2'));
+      the_poll.options_kv.vote_2 = interaction.options.getString('option2');
+    }
+    if (interaction.options.getString('option3'))
+    {
+      the_poll.options.push(interaction.options.getString('option3'));
+      the_poll.options_kv.vote_3 = interaction.options.getString('option3');
+    }
+    if (interaction.options.getString('option4'))
+    {
+      the_poll.options.push(interaction.options.getString('option4'));
+      the_poll.options_kv.vote_4 = interaction.options.getString('option4');
+    }
+    if (interaction.options.getString('option5'))
+    {
+      the_poll.options.push(interaction.options.getString('option5'));
+      the_poll.options_kv.vote_5 = interaction.options.getString('option5');
+    }
 
+    if (interaction.options.getInteger('duration'))
+      the_poll.vote_duration = Number.parseInt(interaction.options.getInteger('duration'));
+  }
 
   const voteEmbed = new EmbedBuilder()
     .setColor(0x0099FF)
@@ -144,7 +178,7 @@ export const execute = async function (interaction) {
 
       const vote_button = new ButtonBuilder()
         .setCustomId(`vote_${counter}`)
-        .setLabel(option + " (" + this.getVoteCountFor(option) + ")")
+        .setLabel(option + " (" + the_poll.getVoteCountFor(option) + ")")
         .setStyle(ButtonStyle.Secondary);
       vote_row.addComponents(vote_button);
       counter++;
@@ -224,7 +258,7 @@ async function updateVoteCounts(poll, voteMessage, done=false)
         //console.log('id:', counter, 'opt:', option);
         const vote_button = new ButtonBuilder()
           .setCustomId(`vote_${counter}`)
-          .setLabel(option)
+          .setLabel(option + " (" + poll.getVoteCountFor(option) + ")")
           .setStyle(ButtonStyle.Secondary);
         vote_row.addComponents(vote_button);
         counter++;
