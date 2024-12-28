@@ -5,6 +5,8 @@ const require = Module.createRequire(import.meta.url);
 const __dirname = import.meta.dirname;
 import { SlashCommandBuilder } from 'discord.js';
 
+const command_aliases = require('../../command-aliases.json');
+
 export const data = new SlashCommandBuilder()
 		.setName('help')
 		.setDescription('view the list of available commands')
@@ -41,7 +43,7 @@ export const execute = async function (interaction) {
 	if (interaction.options && interaction.options.getString('command'))
 	{
 		let command = commands.find((command) => command.name === interaction.options.getString('command'));
-		response = "/" + command.name + ' - ' + command.description + "\n";
+		response = "!" + command.name + ' - ' + command.description + "\n";
 		await interaction.reply(response);
 	}
 	else
@@ -49,7 +51,11 @@ export const execute = async function (interaction) {
 		response = "available commands:\n";
 
 		for (let command of commands)
-			response += "/" + command.name + ' - ' + command.description + "\n";
+		{
+			response += "!" + command.name + ' - ' + command.description + "\n";
+			if (command_aliases[command.name])
+				response += "\t\taliases: " + command_aliases[command.name] + "\n";
+		}
 		await interaction.reply(response);
 	}
 }
