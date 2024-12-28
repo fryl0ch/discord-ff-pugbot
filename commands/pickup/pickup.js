@@ -7,6 +7,7 @@ export const data = new SlashCommandBuilder()
 		.setDescription('start a pickup (and !add to it)');
 
 export const execute = async function (interaction) {
-	pickup.start();
+	pickup.start(interaction.member);
+	await interaction.channel.send('pickup is starting');
 	await interaction.reply(pickup.add(interaction.member.displayName));
 }

@@ -12,6 +12,9 @@ const captain_modes = {
   };
 
 class PickupGame {
+  admin;
+  admin_discord_id;
+
   max_nominations = 3;
   vote_duration = 30; // in seconds
   nominated = [];
@@ -60,7 +63,8 @@ class PickupGame {
       return this.pool;
   }
 
-  start() {
+  start(starter) {
+    this.admin = starter;
     this.started = true;
     console.log('pickup started');
   }
