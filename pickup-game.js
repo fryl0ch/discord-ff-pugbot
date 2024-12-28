@@ -2,22 +2,7 @@ import Module from "node:module";
 const require = Module.createRequire(import.meta.url);
 const known_maps = require('./known-maps.json');
 
-class PickupGame {
-  max_nominations = 3;
-  vote_duration = 30; // in seconds
-  nominated = [];
-
-  team_sizes = {
-      ones: { description: '1v1', pool: 2 }, 
-      twos: { description: '2v2', pool: 4 },
-      threes: { description: '3v3', pool: 6 },
-      fours: { description: '4v4', pool: 8 },
-      fives: { description: '5v5', pool: 10 },
-  };
-
-  team_size = 8;
-
-  captain_modes = {
+const captain_modes = {
     shuffle: { description: 'teams are assigned randomly' },
     shuffle_capts: { description: 'two captains are randomly chosen, who then pick their teams' },
     admin_pick_capts: { description: 'pug admin chooses 2 captains, who then pick their teams' },
@@ -25,6 +10,25 @@ class PickupGame {
     // skill_capts: { description: 'the two players with the highest ELO are chosen as captains, and they then pick the teams'},
     // skill_shuffle: { description: 'bot attempts to pick teams with similar average ELOs'}
   };
+
+class PickupGame {
+  max_nominations = 3;
+  vote_duration = 30; // in seconds
+  nominated = [];
+
+  map_mode = 'vote';
+
+  team_sizes = {
+      ones: { description: '1v1', pool_size: 2 }, 
+      twos: { description: '2v2', pool_size: 4 },
+      threes: { description: '3v3', pool_size: 6 },
+      fours: { description: '4v4', pool_size: 8 },
+      fives: { description: '5v5', pool_size: 10 },
+  };
+
+  players = 8;
+
+  captains_mode = captain_modes['shuffle_capts'];
 
   started = false;
 
@@ -42,7 +46,7 @@ class PickupGame {
       if (!this.pool.pool.includes(player))
       {
         this.pool.pool.push(player)
-        return `${player} has joined the pickup! ${this.pool.pool.length}/${this.team_size}`;
+        return `${player} has joined the pickup! ${this.pool.pool.length}/${this.players}`;
       }
       else
         return `${player} is already in the pool!`
@@ -79,7 +83,7 @@ class PickupGame {
       blue: [], // OFFENSE
       pool: [] // player not picked yet, or pug not started yet and pug still filling
     };
-    this.team_size = 8;
+    this.players = 8;
     return 'pickup ended';
   }
 
@@ -94,7 +98,7 @@ class PickupGame {
           else
             return true;
         });
-        return `${player} has left the pickup (${this.pool.pool.length}/${this.team_size})`
+        return `${player} has left the pickup (${this.pool.pool.length}/${this.players})`
       }
       else
         return `${player} isn't even added!`;
@@ -105,6 +109,17 @@ class PickupGame {
 
   rockTheVote() {
     //TBI
+  }
+
+  setMode(mode) {
+    let modes = ['vote', 'random'];
+    if (modes.includes(mode))
+    {
+      this.map_mode = mode;
+      return `pickup map mode set to ${mode}`;
+    }
+    else
+      return `unknown mode: ${mode}`;
   }
 
   nominate(nomination, player) {
