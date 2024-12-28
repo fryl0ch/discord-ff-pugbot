@@ -50,9 +50,9 @@ class Poll {
     } catch (error) {
       if (error.code === 'InteractionCollectorError') // out of time
       {
-        console.log('voting finished');
+        console.log('voting finished', error);
         await updateVoteCounts(this, voteMessage, true);
-        voteMessage.reply('Voting has ended.');
+        //voteMessage.reply('Voting has ended.');
       }
       else
         throw error;
@@ -157,6 +157,7 @@ export const execute = async function (interaction) {
 
     the_poll.options = [yes_vote_value, no_vote_value];
     the_poll.options_kv = {vote_1: yes_vote_value, vote_2: no_vote_value};
+
     const yes_vote_button = new ButtonBuilder()
       .setCustomId(`vote_1`)
       .setLabel(yes_vote_value)
@@ -166,18 +167,24 @@ export const execute = async function (interaction) {
       .setLabel(no_vote_value)
       .setStyle(ButtonStyle.Secondary);
     vote_row.addComponents(yes_vote_button, no_vote_button);
-  }
 
-  await interaction.reply('starting vote...');
-  let voteMessage = await interaction.channel.send({
-    embeds: [voteEmbed],
-    components: [vote_row]
-  });
+    voteEmbed.addFields(
+        {name: " ", value: `1: ${yes_vote_value}`},
+        {name: " ", value: `2: ${no_vote_value}`},
+      );
+  }
 
   for (let option of Object.keys(the_poll.options_kv))
   {
     the_poll.vote_results[option] = [];
   }
+
+  //await interaction.reply('starting vote...');
+  //await interaction.deferUpdate();
+  let voteMessage = await interaction.reply({
+    embeds: [voteEmbed],
+    components: [vote_row]
+  });
 
   the_poll.updateInterval = setInterval(updateVoteCounts, 5_000, the_poll, voteMessage);
   setTimeout(clearInterval, (the_poll.vote_duration*1000) - 4_000, the_poll.updateInterval);
@@ -198,9 +205,10 @@ async function updateVoteCounts(poll, voteMessage, done=false)
 
     if (Object.keys(poll.vote_results).length)
     {
+      let counter = 1;
       for (let result of Object.keys(poll.vote_results))
       {
-        resultsEmbed.addFields({name: " ", value: `${poll.options_kv[result]} recieved ${poll.getVoteCountFor(result)} vote${poll.getVoteCountFor(result) > 1 ? 's' : ''}`});
+        resultsEmbed.addFields({name: " ", value: `${counter++}: ${poll.options_kv[result]} recieved ${poll.getVoteCountFor(result)} vote${poll.getVoteCountFor(result) > 1 ? 's' : ''}`});
       }
     }
     else
