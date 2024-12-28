@@ -9,23 +9,23 @@ export const data = new SlashCommandBuilder()
 export const execute = async function (interaction) {
 	let ender = interaction.member;
 
-	if (ender.username !== pickup.admin.username)
+	if (ender.id === pickup.admin.id)
+		await interaction.reply(pickup.end());
+	else
 	{
-		let vetoMessage = `@${interaction.member.displayName} is trying to end your pickup! You have 30 seconds to veto or the pickup will end.`
+		let vetoMessage = `<@${pickup.admin.id}>, <@${interaction.member.id}> is trying to end your pickup! You have 30 seconds to veto or the pickup will end.`;
 
 		let admin_response = await veto(vetoMessage, interaction);
 
 		if (admin_response) return; //without !end ing
 	}
-	
-	await interaction.reply(pickup.end());
 }
 
 
 export const veto = async function (thingToVeto, interaction) {
 	const confirm = new ButtonBuilder()
 		.setCustomId('veto')
-		.setLabel('Veto')
+		.setLabel('!veto')
 		.setStyle(ButtonStyle.Danger);
 
 	const cancel = new ButtonBuilder()
@@ -47,7 +47,7 @@ export const veto = async function (thingToVeto, interaction) {
 		const confirmation = await response.awaitMessageComponent({ filter: collectorFilter, time: 30_000 });
 
 		if (confirmation.customId === 'veto') {
-			await response.edit({ content: `!end has been vetoed by ${pickup.admin.displayName}`, components: [] });
+			await response.edit({ content: `!end has been !vetoed by ${pickup.admin.displayName}`, components: [] });
 			return true;
 		} else if (confirmation.customId === 'cancel') {
 			await response.delete();
