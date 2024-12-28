@@ -12,14 +12,14 @@ export const execute = async function (interaction) {
 		let response;
 		if (pickup.isFull())
 		{
-			const red = "### RED TEAM\n" + pickup.pool.red;
-			const blue = "### BLUE TEAM\n" + pickup.pool.blue;
+			const red = "### RED TEAM (defense):\n" + pickup.pool.red;
+			const blue = "### BLUE TEAM (offense):\n" + pickup.pool.blue;
 			response = `${red}\n${blue}`;
 			
 		}
 		else
 			if (pickup.pool.pool.length > 0)
-				response = `### POOL ${pickup.pool.pool.length}/${pickup.team_size}\n` + pickup.pool.pool;
+				response = `### POOL ${pickup.pool.pool.length}/${pickup.players}\n` + pickup.pool.pool;
 			else
 				response = "no one has added to the pickup yet";
 

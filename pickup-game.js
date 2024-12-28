@@ -35,6 +35,8 @@ class PickupGame {
 
   started = false;
 
+  full = false;
+
   pool = {
     red: [], // DEFENSE
     blue: [], // OFFENSE
@@ -49,7 +51,15 @@ class PickupGame {
       if (!this.pool.pool.includes(player))
       {
         this.pool.pool.push(player)
-        return `${player} has joined the pickup! ${this.pool.pool.length}/${this.players}`;
+
+        let addMsg = `${player} has joined the pickup! ${this.pool.pool.length}/${this.players}`;
+        if (this.isFull())
+        {
+          addMsg += "\n Pickup is full!"
+          this.full = true;
+        }
+
+        return addMsg;
       }
       else
         return `${player} is already in the pool!`
@@ -66,7 +76,7 @@ class PickupGame {
   start(starter) {
     this.admin = starter;
     this.started = true;
-    console.log('pickup started');
+    console.log('pickup started by ' + starter.displayName);
   }
 
   isFull() {
@@ -81,6 +91,8 @@ class PickupGame {
       return 'there is no pickup started';
 
     this.started = false;
+    this.full = false;
+    
     this.nominated = [];
     this.pool = {
       red: [], // DEFENSE
@@ -88,6 +100,7 @@ class PickupGame {
       pool: [] // player not picked yet, or pug not started yet and pug still filling
     };
     this.players = 8;
+    console.log('pickup ended');
     return 'pickup ended';
   }
 
