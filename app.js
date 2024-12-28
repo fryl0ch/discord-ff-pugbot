@@ -27,6 +27,8 @@ for (const folder of commandFolders) {
   }
 }
 
+const command_aliases = require('./command-aliases.json');
+
 const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
 
 for (const file of eventFiles) {
@@ -84,7 +86,12 @@ client.on("messageCreate", message => {
   }
 
   if(message.content.startsWith("!")){
-    const message_cmd = message.content.split(' ')[0].replace('!','');
+    let message_cmd = message.content.split(' ')[0].replace('!','');
+
+    let aliased_command = checkIfCommandIsAnAlias(message_cmd);
+
+    if (aliased_command)
+      message_cmd = aliased_command;
 
     const the_command = client.commands.find((command) => command.data.name === message_cmd);
 
@@ -121,6 +128,27 @@ client.on("messageCreate", message => {
       message.reply({content: `command '${message.content}' not found`});
   }
 });
+
+function checkIfCommandIsAnAlias(command) {
+
+  const aliased = Object.keys(command_aliases).filter((c) => {
+              if (command_aliases[c])
+                if (command_aliases[c].includes(command) || command_aliases[c].includes(command))
+                  return true;
+                else
+                  return false;
+              else
+                return false;
+            });
+
+  if (aliased.length === 1)
+  {
+    let actual_command = aliased.pop();
+    return actual_command;
+  }
+  else
+    return false;
+}
 
 function parseOptsFromString(commandString)
 {

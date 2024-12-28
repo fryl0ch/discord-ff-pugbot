@@ -1,0 +1,14 @@
+{
+	"pickup" : ["new_game","newgame", "new", "pikup", "start", "start_game", "startgame"],
+	"add" : ["add_me", "addme", "join"],
+	"ban" : ["ban_player", "banplayer", "timeout"],
+	"banned" : ["banned_player", "bannedplayer", "banned_players", "bannedplayers", "band", "bandplayers", "band_players"],
+	"bitcoin" : ["btc"],
+	"end" : ["edn", "kill","ned","stop"],
+	"map" : ["whatmapwon", "whatmap", "what_map_won", "what_map"],
+	"maps" : ["nominated", "nominated_maps", "nominate_maps", "nominatedmaps", "nominatemaps"],
+	"nominate": ["elect", "iwanttoplay", "i_want_to_play", "nom"],
+	"8ball": ["pugbot", "8-ball", "eight_ball", "eightball"],
+	"remove": ["remove_me", "removeme", "removeplayer", "remove_player"],
+	"teams": ["game_info", "gameinfo", "info"]
+}
