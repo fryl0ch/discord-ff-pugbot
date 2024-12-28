@@ -20,7 +20,7 @@ class PickupGame {
   captain_modes = {
     shuffle: { description: 'teams are assigned randomly' },
     shuffle_capts: { description: 'two captains are randomly chosen, who then pick their teams' },
-    admin_pick: { description: 'pug admin chooses 2 captains, who then choose their teams' },
+    admin_pick_capts: { description: 'pug admin chooses 2 captains, who then pick their teams' },
     admin_rand_capts: { description: 'pug admin provides a list of players for consideration; bot then picks two randomly from the given options' },
     // skill_capts: { description: 'the two players with the highest ELO are chosen as captains, and they then pick the teams'},
     // skill_shuffle: { description: 'bot attempts to pick teams with similar average ELOs'}
@@ -108,7 +108,7 @@ class PickupGame {
   }
 
   nominate(nomination, player) {
-    let map = map.toLowerCase();
+    let map = nomination.toLowerCase();
     if (this.started === true)
     {
       if (this.pool.pool.includes(player))

@@ -7,9 +7,9 @@ export const data = new SlashCommandBuilder()
 		.setDescription('remove from the currently running pickup');
 
 export const execute = async function (interaction) {
-	await interaction.reply(pickup.remove(interaction.member.displayName));
+	let reply = await interaction.reply(pickup.remove(interaction.member.displayName));
 	if (pickup.pool.pool.length === 0) 
 	{
-		await interaction.followUp("pool is empty. " + pickup.end());
+		await reply.reply("pool is empty. " + pickup.end());
 	}
 }

@@ -8,6 +8,5 @@ export const data = new SlashCommandBuilder()
 
 export const execute = async function (interaction) {
 	pickup.start();
-	await interaction.reply('pickup started');
-	await interaction.followUp(pickup.add(interaction.member.displayName));
+	await interaction.reply(pickup.add(interaction.member.displayName));
 }
