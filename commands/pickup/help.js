@@ -44,6 +44,8 @@ export const execute = async function (interaction) {
 	{
 		let command = commands.find((command) => command.name === interaction.options.getString('command'));
 		response = "!" + command.name + ' - ' + command.description + "\n";
+		if (command_aliases[command.name])
+			response += "\t\taliases: " + command_aliases[command.name] + "\n";
 		await interaction.reply(response);
 	}
 	else
@@ -53,8 +55,6 @@ export const execute = async function (interaction) {
 		for (let command of commands)
 		{
 			response += "!" + command.name + ' - ' + command.description + "\n";
-			if (command_aliases[command.name])
-				response += "\t\taliases: " + command_aliases[command.name] + "\n";
 		}
 		await interaction.reply(response);
 	}
