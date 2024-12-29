@@ -3,34 +3,21 @@
 ### Things That Are Never Allowed
 
 1. Midmap DM
-
   - Midmap DM is not allowed unless a flag is involved. 
   	- 3 warnings will be issued; if rule is still not complied to, a timed ban will result
-
 2. Cheating
-
   - Using any hacking software
-
   - Ghosting in spectate
-
 3. Leaving
-
   - Leaving the server without the admin's permission
-
   - Going AFK or spectating without the admin's permission
-
 4. Ruining
-
   - Purposeful teamkilling
-
   - Actively giving up and/or messing around at any time
-
 5. Restricted Classes
-
   - Offensive HWGuy
-
   - Snipers
-
+  
 ### General Gameplay
 
 - Pickups are not public gameplay. It is our competitive version of Fortress Forever.
