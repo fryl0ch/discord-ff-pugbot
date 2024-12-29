@@ -17,7 +17,10 @@ export const execute = async function (interaction) {
 
 		let admin_response = await veto(vetoMessage, interaction);
 
-		if (admin_response) return; //without !end ing
+		if (admin_response) 
+			return; //without !end ing
+		else
+			await interaction.reply(pickup.end());
 	}
 }
 
@@ -28,13 +31,8 @@ export const veto = async function (thingToVeto, interaction) {
 		.setLabel('!veto')
 		.setStyle(ButtonStyle.Danger);
 
-	const cancel = new ButtonBuilder()
-		.setCustomId('cancel')
-		.setLabel('!end')
-		.setStyle(ButtonStyle.Secondary);
-
 	const row = new ActionRowBuilder()
-		.addComponents(cancel, confirm);
+		.addComponents(confirm);
 
 	let response = await interaction.reply({
 		content: thingToVeto,
