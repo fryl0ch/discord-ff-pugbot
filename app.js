@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import path from 'node:path';
+import path, { parse } from 'node:path';
 import Module from "node:module";
 const require = Module.createRequire(import.meta.url);
 const __dirname = import.meta.dirname;
@@ -104,7 +104,7 @@ client.on("messageCreate", message => {
       for (let option of the_command.data.options)
       {
         let index = the_command.data.options.indexOf(option)+1;
-        if (['STRING', 'USER'].includes(slashCommandOptionTypes[option.type]))
+        if (slashCommandOptionTypes[option.type] === "STRING")
         {
           parsed_opts[option.name] = passed_opts[index];
         }
@@ -120,6 +120,12 @@ client.on("messageCreate", message => {
         {
           parsed_opts[option.name] = (passed_opts[index].toLowerCase() === 'true');
         }
+        else if (slashCommandOptionTypes[option.type] === "USER")
+        {
+          parsed_opts[option.name] = message.channel.members.find((user) => {
+            return user.displayName === passed_opts[index] || user.id === passed_opts[index].match(/[0-9]+/)[0] || user.id === passed_opts[index] || user.username === passed_opts[index];
+          });
+        }
       }
 
       the_command.execute(message, parsed_opts);
@@ -132,14 +138,14 @@ client.on("messageCreate", message => {
 function checkIfCommandIsAnAlias(command) {
 
   const aliased = Object.keys(command_aliases).filter((c) => {
-              if (command_aliases[c])
-                if (command_aliases[c].includes(command) || command_aliases[c].includes(command))
-                  return true;
-                else
-                  return false;
-              else
-                return false;
-            });
+    if (command_aliases[c])
+      if (command_aliases[c].includes(command) || command_aliases[c].includes(command))
+        return true;
+      else
+        return false;
+    else
+      return false;
+  });
 
   if (aliased.length === 1)
   {
