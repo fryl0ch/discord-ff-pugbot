@@ -38,11 +38,23 @@ for (const folder of commandFolders) {
   }
 }
 
-export const execute = async function (interaction) {
+export const execute = async function (interaction, options=null) {
 	let response;
-	if (interaction.options && interaction.options.getString('command'))
+
+	let cmd;
+
+	if (options || interaction.options)
 	{
-		let command = commands.find((command) => command.name === interaction.options.getString('command'));
+		if (options)
+		{
+			cmd = options.cmd;
+		}
+		if (interaction.options)
+		{
+			cmd = interaction.options.getString('command');
+		}
+
+		let command = commands.find((command) => command.name === cmd);
 		response = "!" + command.name + ' - ' + command.description + "\n";
 		if (command_aliases[command.name])
 			response += "\t\taliases: " + command_aliases[command.name] + "\n";
