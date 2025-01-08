@@ -1,5 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder} from 'discord.js';
 
+import { shuffle } from '../../utils.js';
+
 const now = function() {
   return (new Date()).valueOf();
 }
@@ -224,6 +226,28 @@ export const execute = async function (interaction, options=null) {
   setTimeout(clearInterval, (the_poll.vote_duration*1000) - 4_000, the_poll.updateInterval);
 
   await the_poll.listenForVotes(voteMessage, the_poll.vote_duration*1_000);
+
+  // count the votes, return winner
+
+  let winner, winnerNumVotes;
+
+  for (let option of shuffle(the_poll.options))
+  {
+    if (!winner)
+    {
+      winner = option;
+      winnerNumVotes = the_poll.getVoteCountFor(option);
+    }
+    else if (the_poll.getVoteCountFor(option) > winnerNumVotes)
+    {
+      winner = option;
+      winnerNumVotes = the_poll.getVoteCountFor(option);
+    }
+  }
+
+  await voteMessage.reply(`${winner} won with ${winnerNumVotes} votes`)
+
+  return winner;
 }
 
 async function updateVoteCounts(poll, voteMessage, done=false)

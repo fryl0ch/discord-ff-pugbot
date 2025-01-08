@@ -2,6 +2,13 @@ import Module from "node:module";
 const require = Module.createRequire(import.meta.url);
 const known_maps = require('./known-maps.json');
 
+
+import { shuffle, delay } from './utils.js';
+import voteCmd from './commands/misc/vote.js';
+
+import EventEmitter from 'node:events';
+
+
 const captain_modes = {
     shuffle: { description: 'teams are assigned randomly' },
     shuffle_capts: { description: 'two captains are randomly chosen, who then pick their teams' },
@@ -11,9 +18,13 @@ const captain_modes = {
     // skill_shuffle: { description: 'bot attempts to pick teams with similar average ELOs'}
   };
 
+const phases = ['inactive', 'started', 'filling', 'map_vote', 'team_picks', 'playing', 'finished'];
+
 class PickupGame {
   admin;
   admin_discord_id;
+
+  eventEmitter = new EventEmitter();
 
   max_nominations = 3;
   vote_duration = 30; // in seconds
@@ -28,6 +39,8 @@ class PickupGame {
       fours: { description: '4v4', pool_size: 8 },
       fives: { description: '5v5', pool_size: 10 },
   };
+
+  phase = 'inactive';
 
   players = 8;
 
@@ -57,6 +70,7 @@ class PickupGame {
         {
           addMsg += "\n Pickup is full!"
           this.full = true;
+          this.eventEmitter.emit('full');
         }
 
         return addMsg;
@@ -76,6 +90,7 @@ class PickupGame {
   start(starter) {
     this.admin = starter;
     this.started = true;
+    this.phase = 'filling';
     console.log('pickup started by ' + starter.displayName);
   }
 
@@ -92,6 +107,7 @@ class PickupGame {
 
     this.started = false;
     this.full = false;
+    this.phase = 'inactive';
     
     this.nominated = [];
     this.pool = {
@@ -101,7 +117,12 @@ class PickupGame {
     };
     this.players = 8;
     console.log('pickup ended');
+    this.eventEmitter.emit('end');
     return 'pickup ended';
+  }
+
+  async startVotes() {
+
   }
 
   remove(player) {
@@ -123,10 +144,6 @@ class PickupGame {
     else
       return `there's no pickup running yet! /pickup to start one.`
   };
-
-  rockTheVote() {
-    //TBI
-  }
 
   setMode(mode) {
     let modes = ['vote', 'random'];

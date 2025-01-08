@@ -35,3 +35,14 @@ export async function InstallGlobalCommands(appId, commands) {
     console.error(err);
   }
 }
+
+export function shuffle(array) {
+  return array.map(value => ({ value, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value);
+}
+
+export function delay(ms)
+{
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
