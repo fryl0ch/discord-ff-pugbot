@@ -4,7 +4,6 @@ const known_maps = require('./known-maps.json');
 
 
 import { shuffle, delay } from './utils.js';
-import voteCmd from './commands/misc/vote.js';
 
 import EventEmitter from 'node:events';
 

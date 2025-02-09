@@ -28,7 +28,7 @@ class Poll {
       clearInterval(this.updateInterval);
   }
 
-  async listenForVotes(voteMessage, duration_ms) {
+  async listenForVotes(voteMessage, duration_ms, the_poll, interaction) {
     try {
       console.log('vote started ', 'duration_ms', duration_ms)
       let voteWatcher = await voteMessage.awaitMessageComponent({time: (this.vote_duration*1_000) - (now() - this.startTime) });
@@ -46,15 +46,14 @@ class Poll {
       if (elapsed_time < duration_ms)
       {
         let time_left = ((this.vote_duration * 1_000) - elapsed_time);
-        console.log('vote recieved, listing for ' + time_left + " more ms");
-        await this.listenForVotes(voteMessage, time_left);
+        console.log('vote recieved, listining for ' + time_left + " more ms");
+        await this.listenForVotes(voteMessage, time_left, the_poll, interaction);
       }
     } catch (error) {
       if (error.code === 'InteractionCollectorError') // out of time
       {
         console.log('voting finished', error);
         await updateVoteCounts(this, voteMessage, true);
-        //voteMessage.reply('Voting has ended.');
       }
       else
         throw error;
@@ -137,7 +136,7 @@ export const execute = async function (interaction, options=null) {
 
     if (interaction.options.getString('option1')) 
     {
-      the_poll.push(interaction.options.getString('option1'));
+      the_poll.options.push(interaction.options.getString('option1'));
       the_poll.vote_1 = interaction.options.getString('option1');
     }
     if (interaction.options.getString('option2'))
@@ -176,11 +175,11 @@ export const execute = async function (interaction, options=null) {
   {
     for (let option of the_poll.options.filter(o => o))
     {
-      voteEmbed.addFields({name: " ", value: option});
+      voteEmbed.addFields({name: " ", value: (the_poll.options.indexOf(option)+1) + ": " + option});
 
       const vote_button = new ButtonBuilder()
         .setCustomId(`vote_${counter}`)
-        .setLabel(option + " (" + the_poll.getVoteCountFor(option) + ")")
+        .setLabel( option )
         .setStyle(ButtonStyle.Secondary);
       vote_row.addComponents(vote_button);
       counter++;
@@ -225,29 +224,7 @@ export const execute = async function (interaction, options=null) {
   the_poll.updateInterval = setInterval(updateVoteCounts, 5_000, the_poll, voteMessage);
   setTimeout(clearInterval, (the_poll.vote_duration*1000) - 4_000, the_poll.updateInterval);
 
-  await the_poll.listenForVotes(voteMessage, the_poll.vote_duration*1_000);
-
-  // count the votes, return winner
-
-  let winner, winnerNumVotes;
-
-  for (let option of shuffle(the_poll.options))
-  {
-    if (!winner)
-    {
-      winner = option;
-      winnerNumVotes = the_poll.getVoteCountFor(option);
-    }
-    else if (the_poll.getVoteCountFor(option) > winnerNumVotes)
-    {
-      winner = option;
-      winnerNumVotes = the_poll.getVoteCountFor(option);
-    }
-  }
-
-  await voteMessage.reply(`${winner} won with ${winnerNumVotes} votes`)
-
-  return winner;
+  await the_poll.listenForVotes(voteMessage, the_poll.vote_duration*1_000, the_poll, interaction);
 }
 
 async function updateVoteCounts(poll, voteMessage, done=false)
@@ -263,10 +240,11 @@ async function updateVoteCounts(poll, voteMessage, done=false)
 
     if (Object.keys(poll.vote_results).length)
     {
-      let counter = 1;
+      let counter = 0;
       for (let result of Object.keys(poll.vote_results))
       {
-        resultsEmbed.addFields({name: " ", value: `${counter++}: ${poll.options_kv[result]} recieved ${poll.getVoteCountFor(result)} vote${poll.getVoteCountFor(result) > 1 ? 's' : ''}`});
+        resultsEmbed.addFields({name: " ", value: `${counter+1}: ${poll.options_kv[result]} recieved ${poll.getVoteCountFor(result)} vote${poll.getVoteCountFor(result) > 1 ? 's' : ''}`});
+        counter++;
       }
     }
     else
@@ -282,7 +260,7 @@ async function updateVoteCounts(poll, voteMessage, done=false)
         //console.log('id:', counter, 'opt:', option);
         const vote_button = new ButtonBuilder()
           .setCustomId(`vote_${counter}`)
-          .setLabel(option + " (" + poll.getVoteCountFor(option) + ")")
+          .setLabel(option)
           .setStyle(ButtonStyle.Secondary);
         vote_row.addComponents(vote_button);
         counter++;
