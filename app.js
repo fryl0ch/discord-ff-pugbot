@@ -4,7 +4,7 @@ import Module from "node:module";
 const require = Module.createRequire(import.meta.url);
 const __dirname = import.meta.dirname;
 
-const { token } = require('./config.json');
+const { token, lifecycle_channel_id, pug_channel_id } = require('./config.json');
 import { Client, Collection, Events, GatewayIntentBits, MessageFlags} from 'discord.js';
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
@@ -44,6 +44,7 @@ for (const file of eventFiles) {
 
 client.once(Events.ClientReady, readyClient => {
   console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+  //client.channels.cache.get(lifecycle_channel_id).send('pugbot started');
 });
 
 client.on(Events.InteractionCreate, async interaction => {
